@@ -77,12 +77,16 @@ def _binding_precedence_test_impl(ctx):
     paths = []
     for entry in plan:
         paths.extend([file.path for file in entry["files"]])
-    asserts.true(env, any([ctx.attr.expected_repository in path for path in paths]), paths)
+    asserts.true(env, any([
+        expected in path
+        for expected in ctx.attr.expected_repositories
+        for path in paths
+    ]), paths)
     return analysistest.end(env)
 
 binding_precedence_test = analysistest.make(
     _binding_precedence_test_impl,
-    attrs = {"expected_repository": attr.string(mandatory = True)},
+    attrs = {"expected_repositories": attr.string_list(mandatory = True)},
 )
 
 def _missing_exact_test_impl(ctx):
@@ -113,8 +117,22 @@ def provider_test_suite(name):
     special_component_test(name = name + "_executable_test", target_under_test = "@foo//:tool", expected_type = "executable")
     runtime_closure_test(name = name + "_runtime_test", target_under_test = "@foo//:runtime_bundle")
     link_plan_test(name = name + "_link_plan_test", target_under_test = "@cps_link_order//:R")
-    binding_precedence_test(name = name + "_package_binding_test", target_under_test = "@bar//:bridge", expected_repository = "internal_foo_macos_arm64")
-    binding_precedence_test(name = name + "_global_binding_test", target_under_test = "@bar_global//:bridge", expected_repository = "internal_foo_alias_macos_arm64")
+    binding_precedence_test(
+        name = name + "_package_binding_test",
+        target_under_test = "@bar//:bridge",
+        expected_repositories = [
+            "internal_foo_macos_arm64",
+            "internal_foo_platform_independent",
+        ],
+    )
+    binding_precedence_test(
+        name = name + "_global_binding_test",
+        target_under_test = "@bar_global//:bridge",
+        expected_repositories = [
+            "internal_foo_alias_macos_arm64",
+            "internal_foo_alias_platform_independent",
+        ],
+    )
     missing_exact_test(name = name + "_missing_exact_test", target_under_test = "@foo//extra:release")
     missing_platform_test(name = name + "_missing_platform_test", target_under_test = "@requires_custom_platform//:headers")
     native.test_suite(

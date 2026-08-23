@@ -8,8 +8,11 @@ def _direct_static_library(target):
     candidates = []
     for linker_input in target[CcInfo].linking_context.linker_inputs.to_list():
         for library in linker_input.libraries:
-            if library.static_library != None:
-                candidates.append(library.static_library)
+            archive = library.static_library
+            if archive == None:
+                archive = library.pic_static_library
+            if archive != None:
+                candidates.append(archive)
     if len(candidates) != 1:
         fail("link-order fixture %s must expose exactly one static archive, got %r" % (target.label, candidates))
     return candidates[0]
