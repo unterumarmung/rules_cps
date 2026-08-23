@@ -30,7 +30,7 @@ targets.
 Each response file contains one JSON-quoted argument per line. GCC and Clang
 accept that response syntax. The wrapper passes the files through `copts`,
 `conlyopts`, and `cxxopts`, and declares them through
-`additional_compiler_inputs`. This is why the v1 baseline is Bazel 9.
+`additional_compiler_inputs`. This requirement sets the Bazel 9 baseline.
 
 The linker response file follows CPS depth-first order. It expands
 `requires` before `link_requires` and keeps deliberate duplicate archive
@@ -49,7 +49,7 @@ runtime closure only.
 
 The wrappers do not set `LD_LIBRARY_PATH` or `DYLD_LIBRARY_PATH`, rewrite
 RPATH, or create launcher scripts. Packages that need custom loader setup must
-provide it outside core v1. A stock edge that loses loader-only files reports
+provide it outside `rules_cps`. A stock edge that loses loader-only files reports
 `dyld_requires` or `module_runtime`.
 
 ## Install the aspect

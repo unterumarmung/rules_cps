@@ -68,7 +68,7 @@ The runtime view follows normal, link-only, and loader-only requirements. It
 uses a visited set because repeated runtime files have no ordering meaning.
 
 Compile and link cycles fail with the component path. Runtime cycles terminate.
-Static-library cycle grouping is not part of v1.
+Static-library cycle grouping is not supported.
 
 ## Generated providers
 

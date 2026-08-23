@@ -33,7 +33,7 @@ def _resolve_component(requirement, source_configuration, packages, preferences)
         ))
     component = package["components"][requirement.component]
     if component["type"] not in _SUPPORTED_USE_TYPES:
-        fail("component requirement %r uses unsupported v1 CPS component type %s at %s.components.%s" % (
+        fail("component requirement %r uses unsupported CPS component type %s at %s.components.%s" % (
             requirement.source,
             component["type"],
             package["source"],
