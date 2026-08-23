@@ -217,14 +217,14 @@ def _parse_cps_version(value, path):
     patch = int(pieces[2]) if len(pieces) > 2 and pieces[2].isdigit() else -1
     cmake_compat = major == 0 and minor == 14 and patch == 1
     if not cmake_compat and (major != 0 or minor < 15):
-        fail("%s %r is incompatible; rules_cps v1 supports CPS 0.15 and later compatible 0.x minors, plus the CPS 0.14.1 CMake interoperability profile" % (path, value))
+        fail("%s %r is incompatible. Supported versions are CPS 0.15 and later compatible 0.x minors, plus CPS 0.14.1 for CMake interoperability" % (path, value))
 
 def normalize_package(value, source = "<memory>"):
     """Validates and normalizes a decoded CPS 0.15 package object.
 
     Unknown package/component attributes are retained under `extensions` and do
     not invalidate the document. Null optionals are treated as absent. Unknown
-    component types are ignored as required by CPS; known-but-v1-unsupported
+    component types are ignored as required by CPS; known but unsupported
     types such as `jar` remain visible for later usage-policy diagnostics.
     """
     _require_type(value, "dict", source)

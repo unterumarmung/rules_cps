@@ -4,7 +4,7 @@
 The package description stays authoritative. The rules do not search package
 registries, system prefixes, compiler caches, or package manager databases.
 
-The v1 code targets CPS 0.15. It supports Linux and macOS with Bazel 9.
+The rules target CPS 0.15. They support Linux and macOS with Bazel 9.
 Windows is not supported.
 
 ## Import a package
@@ -142,14 +142,21 @@ interoperability test.
 
 ## Read next
 
-- `docs/import.md` explains acquisition, variants, labels, and bindings.
-- `docs/configurations.md` defines preference, exact, and same selection.
-- `docs/export.md` explains installed paths and package layout records.
-- `docs/native-compatibility.md` explains wrappers and stock C++ diagnostics.
-- `docs/hermeticity.md` lists path checks and non-hermetic inputs.
-- `docs/api.md` is the public Starlark reference.
-- `docs/support-matrix.md` states what v1 does with each CPS field.
-- `docs/testing.md` maps requirements to tests.
-- `docs/cmake-interoperability.md` explains the CPS 0.14.1 CMake profile.
+- [Import packages](docs/import.md) explains acquisition, variants, labels, and
+  bindings.
+- [Choose a CPS configuration](docs/configurations.md) defines preference,
+  exact, and same selection.
+- [Export packages](docs/export.md) explains installed paths and package layout
+  records.
+- [Use wrappers or stock rules_cc](docs/native-compatibility.md) explains
+  wrappers and stock C++ diagnostics.
+- [Hermeticity and path checks](docs/hermeticity.md) lists path checks and
+  non-hermetic inputs.
+- [Public Starlark API](docs/api.md) is the public API reference.
+- [CPS 0.15 support](docs/support-matrix.md) states how `rules_cps` handles each
+  CPS field.
+- [Tests](docs/testing.md) maps requirements to tests.
+- [CMake interoperability](docs/cmake-interoperability.md) explains the CPS
+  0.14.1 CMake profile.
 
 Runnable BUILD examples live in `examples/BUILD.bazel`.
