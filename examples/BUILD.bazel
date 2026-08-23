@@ -1,0 +1,53 @@
+load("@rules_cps//cps:defs.bzl", "cc_library", "cc_test")
+
+cc_test(
+    name = "minimal_archive_import",
+    srcs = ["consumer.cc"],
+    deps = ["@foo//:headers"],
+)
+
+cc_test(
+    name = "multi_platform_import",
+    srcs = ["platform_consumer.cc"],
+    deps = ["@foo//:headers"],
+)
+
+cc_test(
+    name = "package_binding",
+    srcs = ["binding_consumer.cc"],
+    deps = ["@bar//:bridge"],
+)
+
+cc_test(
+    name = "exact_configuration",
+    srcs = ["exact_consumer.cc"],
+    deps = ["@foo//headers:debug"],
+)
+
+cc_library(
+    name = "wrapped_library",
+    srcs = ["wrapped_library.cc"],
+    deps = ["@foo//:headers"],
+)
+
+cc_test(
+    name = "wrapper_consumer",
+    srcs = ["wrapper_consumer.cc"],
+    deps = [":wrapped_library"],
+)
+
+filegroup(
+    name = "simple_export",
+    srcs = ["//tests/export:package"],
+)
+
+test_suite(
+    name = "documentation_examples",
+    tests = [
+        ":exact_configuration",
+        ":minimal_archive_import",
+        ":multi_platform_import",
+        ":package_binding",
+        ":wrapper_consumer",
+    ],
+)

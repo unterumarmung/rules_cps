@@ -1,0 +1,17 @@
+exports_files([
+    "cmake_interop_test.sh",
+    "consumer/BUILD.bazel.template",
+    "consumer/MODULE.bazel.template",
+    "consumer/consumer.cc",
+    "export_consumer/CMakeLists.txt",
+    "export_consumer/consumer.cc",
+    "producer/CMakeLists.txt",
+    "producer/include/cmake_produced.h",
+    "producer/produced.cc",
+])
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["**"], exclude = ["BUILD.bazel"]),
+    visibility = ["//visibility:public"],
+)

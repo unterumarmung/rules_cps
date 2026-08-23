@@ -1,0 +1,7 @@
+module(name = "non_root_test")
+bazel_dep(name = "rules_cps")
+bazel_dep(name = "child", version = "1.0.0")
+local_path_override(module_name = "child", path = "child")
+local_path_override(module_name = "rules_cps", path = "__RULES_CPS_PATH__")
+cps = use_extension("@rules_cps//cps:extensions.bzl", "cps")
+use_repo(cps, "forbidden")

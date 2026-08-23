@@ -1,0 +1,199 @@
+load("@rules_cps//cps:defs.bzl", "cc_test")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load(":provider_test.bzl", "provider_test_suite")
+load(":nonhermetic_test.bzl", "nonhermetic_test_suite")
+
+exports_files(["assert_imported_link_plan.sh"])
+
+provider_test_suite(name = "provider_tests")
+nonhermetic_test_suite(name = "nonhermetic_tests")
+
+sh_test(
+    name = "nested_archive_repository_test",
+    srcs = ["import_basic_test.sh"],
+    data = [
+        "//:MODULE.bazel",
+        "//cps:all_sources",
+        "//cps/private:all_sources",
+        "//tests/fixtures/basic:BUILD.bazel",
+        "//tests/fixtures/basic:basic.tar.gz",
+        "//tests/fixtures/basic:package_tree",
+        "//tests/fixtures/cycle:BUILD.bazel",
+        "//tests/fixtures/cycle:package_tree",
+        "//tests/export:roundtrip_component",
+        "//tests/export:roundtrip_package",
+        "//tests/export:imported_headers_component",
+        "//tests/export:imported_static_component",
+        "//tests/export:imported_roundtrip_package",
+        "//tests/export:imported_roundtrip_payload",
+        "//tests/export_roundtrip:all_files",
+        "//tests/import_basic:all_files",
+        "//tests/module_cases:all_files",
+    ],
+    env_inherit = ["PATH"],
+    size = "large",
+    tags = ["exclusive", "nested"],
+)
+
+sh_test(
+    name = "cmake_interoperability_test",
+    srcs = ["//tests/cmake_interop:cmake_interop_test.sh"],
+    data = [
+        "//:MODULE.bazel",
+        "//cps:all_sources",
+        "//cps/private:all_sources",
+        "//tests/cmake_interop:all_files",
+        "//tests/export:cmake_component",
+        "//tests/export:cmake_package",
+    ],
+    env_inherit = ["PATH"],
+    size = "large",
+    tags = ["exclusive", "nested"],
+)
+
+config_setting(
+    name = "macos_arm64",
+    constraint_values = [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+constraint_setting(name = "abi")
+constraint_value(name = "custom_abi", constraint_setting = ":abi", visibility = ["//visibility:public"])
+
+platform(
+    name = "custom_host_platform",
+    constraint_values = [":custom_abi"],
+    parents = ["@platforms//host:host"],
+)
+
+config_setting(
+    name = "opt_mode",
+    values = {"compilation_mode": "opt"},
+)
+
+cc_test(
+    name = "import_basic_test",
+    srcs = ["basic_consumer_test.cc"],
+    deps = [
+        "@foo//:extra",
+        "@foo//:headers",
+    ],
+)
+
+cc_test(
+    name = "platform_variant_test",
+    srcs = ["platform_variant_test.cc"],
+    defines = select({
+        ":macos_arm64": ["EXPECTED_FOO_VARIANT=2"],
+        "//conditions:default": ["EXPECTED_FOO_VARIANT=1"],
+    }),
+    deps = ["@foo//:headers"],
+)
+
+cc_test(
+    name = "custom_constraint_variant_test",
+    srcs = ["platform_variant_test.cc"],
+    defines = select({
+        ":macos_arm64": ["EXPECTED_FOO_VARIANT=2"],
+        "//conditions:default": ["EXPECTED_FOO_VARIANT=1"],
+    }),
+    deps = ["@foo//:headers"],
+)
+
+cc_test(
+    name = "static_archive_test",
+    srcs = ["static_archive_test.cc"],
+    deps = ["@foo//:static"],
+)
+
+cc_test(
+    name = "dynamic_library_test",
+    srcs = ["dynamic_library_test.cc"],
+    deps = ["@foo//:dynamic"],
+)
+
+cc_test(
+    name = "module_runtime_test",
+    srcs = ["module_runtime_test.cc"],
+    data = [":module_link_plan_validation"],
+    deps = ["@foo//:runtime_bundle"],
+)
+
+cc_test(name = "compile_requires_test", srcs = ["compile_requires_test.cc"], deps = ["@foo//:compile_bridge"])
+cc_test(name = "link_requires_test", srcs = ["link_requires_test.cc"], deps = ["@foo//:link_bridge"])
+cc_test(name = "same_configuration_test", srcs = ["same_configuration_test.cc"], deps = ["@foo//same_bridge:debug"])
+
+genrule(
+    name = "module_link_plan_validation",
+    srcs = [":_rules_cps_module_runtime_test_link_plan"],
+    outs = ["module_link_plan.validated"],
+    cmd = "test ! -s $(location :_rules_cps_module_runtime_test_link_plan) && touch $@",
+)
+
+cc_test(
+    name = "package_binding_test",
+    srcs = ["package_binding_test.cc"],
+    deps = ["@bar//:bridge"],
+)
+
+cc_test(
+    name = "global_package_binding_test",
+    srcs = ["package_binding_test.cc"],
+    deps = ["@bar_global//:bridge"],
+)
+
+cc_test(
+    name = "imported_link_order_test",
+    srcs = ["imported_link_order_test.cc"],
+    data = [":imported_link_plan_validation"],
+    deps = ["@cps_link_order//:R"],
+)
+
+genrule(
+    name = "imported_link_plan_validation",
+    srcs = [":_rules_cps_imported_link_order_test_link_plan"],
+    outs = ["imported_link_plan.validated"],
+    cmd = "$(location :assert_imported_link_plan.sh) $(location :_rules_cps_imported_link_order_test_link_plan) && touch $@",
+    tools = [":assert_imported_link_plan.sh"],
+)
+
+cc_test(
+    name = "compilation_mode_configuration_test",
+    srcs = ["compilation_mode_configuration_test.cc"],
+    defines = select({
+        ":opt_mode": ["EXPECTED_FOO_CONFIGURATION=1"],
+        "//conditions:default": ["EXPECTED_FOO_CONFIGURATION=2"],
+    }),
+    deps = ["@foo//:headers"],
+)
+
+cc_test(
+    name = "automatic_cps_discovery_test",
+    srcs = ["automatic_cps_discovery_test.cc"],
+    deps = ["@foo_auto//:headers"],
+)
+
+cc_test(
+    name = "env_package_test",
+    srcs = ["automatic_cps_discovery_test.cc"],
+    deps = ["@foo_env//:headers"],
+    tags = ["manual"],
+)
+
+
+
+
+
+cc_test(
+    name = "import_default_test",
+    srcs = ["basic_default_test.cc"],
+    deps = ["@foo//:@default"],
+)
+
+cc_test(
+    name = "import_exact_configuration_test",
+    srcs = ["basic_exact_test.cc"],
+    deps = ["@foo//headers:debug"],
+)

@@ -1,0 +1,37 @@
+load("@rules_cps//cps:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("@rules_cc//cc:cc_library.bzl", native_cc_library = "cc_library")
+
+cc_library(
+    name = "direct",
+    srcs = ["direct.c", "direct.cc"],
+    deps = ["@foo//:headers"],
+)
+
+cc_library(
+    name = "transitive",
+    srcs = ["transitive.cc"],
+    deps = [":direct"],
+)
+
+cc_library(
+    name = "private",
+    srcs = ["private.cc"],
+    implementation_deps = ["@foo//:headers"],
+)
+
+cc_library(
+    name = "private_consumer",
+    srcs = ["private_consumer.cc"],
+    deps = [":private"],
+)
+
+cc_test(
+    name = "wrapper_flags_test",
+    srcs = ["main.cc"],
+    deps = [":transitive", ":private_consumer"],
+)
+
+native_cc_library(
+    name = "unrelated",
+    srcs = ["unrelated.cc"],
+)

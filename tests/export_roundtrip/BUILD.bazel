@@ -1,0 +1,7 @@
+exports_files(["BUILD.bazel", "BUILD.bazel.template", "CMakeLists.txt", "MODULE.bazel.template", "cmake_consumer.cc", "consumer.cc", "imported_consumer.cc"])
+
+filegroup(
+    name = "all_files",
+    srcs = ["BUILD.bazel.template", "CMakeLists.txt", "MODULE.bazel.template", "cmake_consumer.cc", "consumer.cc", "imported_consumer.cc"],
+    visibility = ["//visibility:public"],
+)

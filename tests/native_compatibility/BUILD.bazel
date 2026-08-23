@@ -1,0 +1,32 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load(":compatibility_test.bzl", "compatibility_test_suite")
+
+cc_library(
+    name = "stock_consumer",
+    srcs = ["stock_consumer.cc"],
+    deps = ["@foo//:headers"],
+    tags = ["manual"],
+)
+
+cc_library(
+    name = "stock_duplicate_consumer",
+    srcs = ["stock_consumer.cc"],
+    deps = ["@cps_link_order//:R"],
+    tags = ["manual"],
+)
+
+cc_library(
+    name = "stock_runtime_consumer",
+    srcs = ["stock_consumer.cc"],
+    deps = ["@foo//:runtime_bundle"],
+    tags = ["manual"],
+)
+
+cc_library(
+    name = "stock_module_consumer",
+    srcs = ["stock_consumer.cc"],
+    deps = ["@foo//:plugin"],
+    tags = ["manual"],
+)
+
+compatibility_test_suite(name = "compatibility_tests")

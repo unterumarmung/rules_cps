@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        bazel: [9.x]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: bazel-contrib/setup-bazel@0.18.0
+        with:
+          bazelisk-cache: true
+          bazelrc: |
+            common --announce_rc
+      - name: Install maintained CMake with CPS support
+        shell: bash
+        run: |
+          python3 -m venv "$RUNNER_TEMP/cmake"
+          "$RUNNER_TEMP/cmake/bin/python" -m pip install cmake==4.4.2
+          echo "$RUNNER_TEMP/cmake/bin" >> "$GITHUB_PATH"
+      - run: USE_BAZEL_VERSION=${{ matrix.bazel }} bazel test //...
+      - run: USE_BAZEL_VERSION=${{ matrix.bazel }} bazel test --compilation_mode=opt //tests:compilation_mode_configuration_test
+      - run: USE_BAZEL_VERSION=${{ matrix.bazel }} bazel test --platforms=//tests:custom_host_platform //tests:custom_constraint_variant_test
+      - run: USE_BAZEL_VERSION=${{ matrix.bazel }} bazel test --repo_env=RULES_CPS_TEST_PACKAGE_ROOT="$PWD/tests/fixtures/basic/package" //tests:env_package_test

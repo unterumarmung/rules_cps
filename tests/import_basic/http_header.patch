@@ -1,0 +1,11 @@
+--- a/include/foo/foo.h
++++ b/include/foo/foo.h
+@@ -1,5 +1,7 @@
+ #ifndef RULES_CPS_TEST_FOO_H_
+ #define RULES_CPS_TEST_FOO_H_
+ 
++#define RULES_CPS_HTTP_PATCHED 1
++
+ #ifndef FOO_IMPORTED
+ #error "CPS consumer definition did not propagate"
+ #endif

@@ -1,0 +1,7 @@
+load("@rules_cps//cps:defs.bzl", "cc_binary")
+
+cc_binary(
+    name = "consumer",
+    srcs = ["consumer.cc"],
+    deps = ["@cmake_produced//:core"],
+)

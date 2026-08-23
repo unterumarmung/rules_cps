@@ -1,0 +1,189 @@
+module(
+    name = "rules_cps",
+    version = "0.0.0",
+)
+
+bazel_dep(name = "bazel_skylib", version = "1.9.2")
+bazel_dep(name = "rules_cc", version = "0.2.22")
+bazel_dep(name = "rules_shell", version = "0.6.1")
+bazel_dep(name = "platforms", version = "1.1.0")
+
+cps = use_extension("//cps:extensions.bzl", "cps", dev_dependency = True)
+
+cps.config(
+    default_package_bindings = {"Foo": "foo_alias"},
+    compilation_mode_preferences = {
+        "dbg": ["debug"],
+        "fastbuild": ["debug"],
+        "opt": ["release"],
+    },
+)
+
+cps.package(
+    name = "foo",
+    expected_name = "Foo",
+    expose_components = ["capability", "compile_bridge", "dynamic", "extra", "headers", "link_bridge", "plugin", "runtime_bundle", "same_bridge", "static", "tool"],
+    expose_configurations = ["debug", "release"],
+    cps_file = "share/cps/Foo/Foo.cps",
+)
+
+cps.package(
+    name = "foo_auto",
+    expected_name = "Foo",
+    expose_components = ["headers"],
+)
+
+cps.package(
+    name = "foo_alias",
+    expected_name = "Foo",
+)
+
+cps.package(
+    name = "bar",
+    expected_name = "Bar",
+    package_bindings = {"Foo": "foo"},
+    expose_components = ["bridge"],
+)
+
+cps.package(
+    name = "bar_global",
+    expected_name = "Bar",
+    expose_components = ["bridge"],
+)
+
+cps.package(
+    name = "cps_link_order",
+    expected_name = "LinkOrder",
+    expose_components = ["R"],
+)
+
+cps.package(
+    name = "foo_env",
+    expected_name = "Foo",
+    expose_components = ["headers"],
+)
+
+cps.package(
+    name = "optional_env",
+    expected_name = "OptionalSDK",
+    expose_components = ["core"],
+)
+
+cps.package(
+    name = "requires_custom_platform",
+    expected_name = "Foo",
+    expose_components = ["headers"],
+)
+
+cps.archive(
+    package = "foo",
+    variant = "platform_independent",
+    archive = "//tests/fixtures/basic:basic.tar.gz",
+)
+
+cps.archive(
+    package = "requires_custom_platform",
+    variant = "custom_only",
+    archive = "//tests/fixtures/basic:basic.tar.gz",
+    compatible_with = ["//tests:custom_abi"],
+)
+
+cps.env_package(
+    package = "foo_env",
+    variant = "environment",
+    env = "RULES_CPS_TEST_PACKAGE_ROOT",
+    required = False,
+)
+
+cps.env_package(
+    package = "optional_env",
+    variant = "environment",
+    env = "RULES_CPS_TEST_DEFINITELY_UNSET_7431",
+    required = False,
+)
+
+cps.archive(
+    package = "foo_auto",
+    variant = "platform_independent",
+    archive = "//tests/fixtures/basic:basic.tar.gz",
+)
+
+cps.archive(
+    package = "bar",
+    variant = "platform_independent",
+    archive = "//tests/fixtures/bound:bound.tar.gz",
+)
+
+cps.archive(
+    package = "bar_global",
+    variant = "platform_independent",
+    archive = "//tests/fixtures/bound:bound.tar.gz",
+)
+
+cps.archive(
+    package = "foo_alias",
+    variant = "platform_independent",
+    archive = "//tests/fixtures/basic:basic.tar.gz",
+    cps_file = "share/cps/Foo/Foo.cps",
+)
+
+cps.archive(
+    package = "foo_alias",
+    variant = "macos_arm64",
+    archive = "//tests/fixtures/macos_arm64:macos_arm64.tar.gz",
+    compatible_with = [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+    ],
+    cps_file = "share/cps/Foo/Foo.cps",
+)
+
+cps.archive(
+    package = "cps_link_order",
+    variant = "platform_independent",
+    archive = "//tests/fixtures/link_order_generic:link_order_generic.tar.gz",
+)
+
+cps.archive(
+    package = "cps_link_order",
+    variant = "macos_arm64",
+    archive = "//tests/fixtures/link_order_macos_arm64:link_order_macos_arm64.tar.gz",
+    compatible_with = [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+cps.archive(
+    package = "foo",
+    variant = "macos_arm64",
+    archive = "//tests/fixtures/macos_arm64:macos_arm64.tar.gz",
+    compatible_with = [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+cps.archive(
+    package = "foo",
+    variant = "linux_x86_64_custom_abi",
+    archive = "//tests/fixtures/basic:basic.tar.gz",
+    compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+        "//tests:custom_abi",
+    ],
+)
+
+cps.archive(
+    package = "foo",
+    variant = "macos_arm64_custom_abi",
+    archive = "//tests/fixtures/macos_arm64:macos_arm64.tar.gz",
+    compatible_with = [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
+        "//tests:custom_abi",
+    ],
+)
+
+use_repo(cps, "bar", "bar_global", "cps_link_order", "foo", "foo_alias", "foo_auto", "foo_env", "optional_env", "requires_custom_platform")

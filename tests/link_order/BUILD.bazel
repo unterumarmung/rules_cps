@@ -1,0 +1,58 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+load("@rules_cps//cps:defs.bzl", cps_cc_library = "cc_library", cps_cc_test = "cc_test")
+load(":link_plan.bzl", "link_inputs", "link_plan")
+
+cc_library(
+    name = "lib_a",
+    srcs = ["a_entry.cc", "a_helper.cc"],
+)
+
+cc_library(
+    name = "lib_b",
+    srcs = ["b_value.cc"],
+)
+
+link_plan(
+    name = "aba_plan",
+    libraries = {
+        ":lib_a": "A",
+        ":lib_b": "B",
+    },
+    order = ["A", "B", "A"],
+)
+
+link_inputs(
+    name = "aba_inputs",
+    plan = ":aba_plan",
+)
+
+cc_test(
+    name = "duplicate_link_order_test",
+    srcs = ["main.cc"],
+    additional_linker_inputs = [
+        ":aba_inputs",
+        ":aba_plan",
+    ],
+    linkopts = ["@$(location :aba_plan)"],
+)
+
+cps_cc_library(
+    name = "wrapped_link_dependency",
+    deps = ["@cps_link_order//:R"],
+)
+
+cps_cc_test(
+    name = "wrapped_transitive_link_test",
+    srcs = ["main.cc"],
+    data = [":wrapped_transitive_link_plan_validation"],
+    deps = [":wrapped_link_dependency"],
+)
+
+genrule(
+    name = "wrapped_transitive_link_plan_validation",
+    srcs = [":_rules_cps_wrapped_transitive_link_test_link_plan"],
+    outs = ["wrapped_transitive_link_plan.validated"],
+    cmd = "$(location //tests:assert_imported_link_plan.sh) $(location :_rules_cps_wrapped_transitive_link_test_link_plan) && touch $@",
+    tools = ["//tests:assert_imported_link_plan.sh"],
+)

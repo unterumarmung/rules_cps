@@ -1,0 +1,7 @@
+module(name = "missing_binding_target_test")
+bazel_dep(name = "rules_cps")
+local_path_override(module_name = "rules_cps", path = "__RULES_CPS_PATH__")
+cps = use_extension("@rules_cps//cps:extensions.bzl", "cps")
+cps.package(name = "foo", package_bindings = {"ZLIB": "not_declared"})
+cps.archive(package = "foo", variant = "generic", archive = "@rules_cps//tests/fixtures/basic:basic.tar.gz")
+use_repo(cps, "foo")

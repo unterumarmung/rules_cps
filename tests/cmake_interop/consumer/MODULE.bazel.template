@@ -1,0 +1,20 @@
+module(name = "rules_cps_cmake_producer_consumer")
+
+bazel_dep(name = "rules_cps")
+bazel_dep(name = "rules_cc", version = "0.2.22")
+local_path_override(module_name = "rules_cps", path = "__RULES_CPS_PATH__")
+
+cps_local_package_repository = use_repo_rule(
+    "@rules_cps//cps/private:repositories.bzl",
+    "cps_local_package_repository",
+)
+
+cps_local_package_repository(
+    name = "cmake_produced",
+    path = "__PACKAGE_PREFIX__",
+    cps_file = "lib/cps/CMakeProduced/CMakeProduced.cps",
+    expected_name = "CMakeProduced",
+    logical_name = "cmake_produced",
+    require_global_aspect = False,
+    variant = "cmake_0_14_1",
+)

@@ -1,0 +1,174 @@
+module(name = "rules_cps_import_basic_test")
+
+bazel_dep(name = "rules_cps")
+bazel_dep(name = "rules_cc", version = "0.2.22")
+local_path_override(module_name = "rules_cps", path = "__RULES_CPS_PATH__")
+
+cps_archive_repository = use_repo_rule(
+    "@rules_cps//cps/private:repositories.bzl",
+    "cps_archive_repository",
+)
+
+cps_archive_repository(
+    name = "foo",
+    archive = "@rules_cps//tests/fixtures/basic:basic.tar.gz",
+    cps_file = "share/cps/Foo/Foo.cps",
+    expected_name = "Foo",
+    logical_name = "foo",
+    require_global_aspect = False,
+    variant = "platform_independent",
+)
+
+cps_local_package_repository = use_repo_rule(
+    "@rules_cps//cps/private:repositories.bzl",
+    "cps_local_package_repository",
+)
+
+cps_local_package_repository(
+    name = "foo_local",
+    path = "__LOCAL_PACKAGE_PATH__",
+    cps_file = "share/cps/Foo/Foo.cps",
+    expected_name = "Foo",
+    logical_name = "foo_local",
+    require_global_aspect = False,
+    variant = "local",
+)
+
+cps_local_package_repository(
+    name = "escaping_header",
+    path = "__ESCAPING_PACKAGE_PATH__",
+    cps_file = "share/cps/Foo/Foo.cps",
+    logical_name = "escaping_header",
+    require_global_aspect = False,
+    variant = "bad",
+)
+
+cps_local_package_repository(
+    name = "cycle_package",
+    path = "__CYCLE_PACKAGE_PATH__",
+    cps_file = "share/cps/Cycle/Cycle.cps",
+    logical_name = "cycle_package",
+    require_global_aspect = False,
+    variant = "bad",
+)
+
+cps_local_package_repository(
+    name = "multiple_cps",
+    path = "__MULTIPLE_CPS_PATH__",
+    logical_name = "multiple_cps",
+    require_global_aspect = False,
+    variant = "bad",
+)
+
+cps_local_package_repository(
+    name = "missing_local",
+    path = "__MISSING_LOCAL_PATH__",
+    logical_name = "missing_local",
+    require_global_aspect = False,
+    variant = "bad",
+)
+
+cps_local_package_repository(
+    name = "absolute_include",
+    path = "__ABSOLUTE_INCLUDE_PATH__",
+    cps_file = "share/cps/Foo/Foo.cps",
+    logical_name = "absolute_include",
+    require_global_aspect = False,
+    variant = "bad",
+)
+
+cps_local_package_repository(
+    name = "escaping_location",
+    path = "__ESCAPING_LOCATION_PATH__",
+    cps_file = "share/cps/Foo/Foo.cps",
+    logical_name = "escaping_location",
+    require_global_aspect = False,
+    variant = "bad",
+)
+
+cps_local_package_repository(
+    name = "absolute_link_library",
+    path = "__ABSOLUTE_LINK_LIBRARY_PATH__",
+    cps_file = "share/cps/Foo/Foo.cps",
+    logical_name = "absolute_link_library",
+    require_global_aspect = False,
+    variant = "bad",
+)
+
+cps_local_archive_repository = use_repo_rule(
+    "@rules_cps//cps/private:repositories.bzl",
+    "cps_local_archive_repository",
+)
+
+cps_local_archive_repository(
+    name = "foo_local_archive",
+    path = "__LOCAL_ARCHIVE_PATH__",
+    integrity = "__LOCAL_ARCHIVE_INTEGRITY__",
+    cps_file = "share/cps/Foo/Foo.cps",
+    expected_name = "Foo",
+    logical_name = "foo_local_archive",
+    require_global_aspect = False,
+    variant = "local_archive",
+)
+
+cps_http_archive_repository = use_repo_rule(
+    "@rules_cps//cps/private:repositories.bzl",
+    "cps_http_archive_repository",
+)
+
+cps_http_archive_repository(
+    name = "foo_http",
+    urls = [
+        "__HTTP_BASE__/missing-mirror.tar.gz",
+        "__HTTP_BASE__/http.tar.gz",
+    ],
+    integrity = "__HTTP_ARCHIVE_INTEGRITY__",
+    cps_file = "share/cps/Foo/Foo.cps",
+    expected_name = "Foo",
+    logical_name = "foo_http",
+    require_global_aspect = False,
+    variant = "http",
+)
+
+cps_http_archive_repository(
+    name = "foo_http_patched",
+    urls = ["__HTTP_BASE__/http-wrapped.tar.gz"],
+    integrity = "__HTTP_WRAPPED_INTEGRITY__",
+    strip_prefix = "wrapped",
+    patches = ["@rules_cps//tests/import_basic:http_header.patch"],
+    patch_strip = 1,
+    cps_file = "share/cps/Foo/Foo.cps",
+    expected_name = "Foo",
+    logical_name = "foo_http_patched",
+    require_global_aspect = False,
+    variant = "http_patched",
+)
+
+cps_http_archive_repository(
+    name = "bad_integrity",
+    urls = ["__HTTP_BASE__/http.tar.gz"],
+    integrity = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    cps_file = "share/cps/Foo/Foo.cps",
+    logical_name = "bad_integrity",
+    require_global_aspect = False,
+    variant = "bad",
+)
+
+cps_archive_repository(
+    name = "missing_cps",
+    archive = "@rules_cps//tests/fixtures/basic:basic.tar.gz",
+    cps_file = "share/cps/Foo/DoesNotExist.cps",
+    logical_name = "missing_cps",
+    require_global_aspect = False,
+    variant = "bad",
+)
+
+cps_archive_repository(
+    name = "wrong_name",
+    archive = "@rules_cps//tests/fixtures/basic:basic.tar.gz",
+    cps_file = "share/cps/Foo/Foo.cps",
+    expected_name = "DefinitelyNotFoo",
+    logical_name = "wrong_name",
+    require_global_aspect = False,
+    variant = "bad",
+)

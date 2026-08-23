@@ -1,0 +1,2 @@
+filegroup(name = "package_tree", srcs = glob(["package/**"]), visibility = ["//visibility:public"])
+exports_files(["BUILD.bazel"], visibility = ["//visibility:public"])

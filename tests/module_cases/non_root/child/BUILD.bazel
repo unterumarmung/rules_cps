@@ -1,0 +1,1 @@
+filegroup(name = "all_files", srcs = ["BUILD.bazel", "MODULE.bazel"], visibility = ["//visibility:public"])

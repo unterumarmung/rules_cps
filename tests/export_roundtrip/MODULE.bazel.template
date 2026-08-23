@@ -1,0 +1,19 @@
+module(name = "rules_cps_export_roundtrip_test")
+bazel_dep(name = "rules_cps")
+bazel_dep(name = "rules_cc", version = "0.2.22")
+local_path_override(module_name = "rules_cps", path = "__RULES_CPS_PATH__")
+
+cps_local_package_repository = use_repo_rule(
+    "@rules_cps//cps/private:repositories.bzl",
+    "cps_local_package_repository",
+)
+
+cps_local_package_repository(
+    name = "roundtrip",
+    path = "__PACKAGE_PREFIX__",
+    cps_file = "share/cps/__PACKAGE_NAME__/__PACKAGE_NAME__.cps",
+    expected_name = "__PACKAGE_NAME__",
+    logical_name = "roundtrip",
+    require_global_aspect = False,
+    variant = "relocated",
+)

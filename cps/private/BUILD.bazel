@@ -1,0 +1,58 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load(":semantics_test.bzl", "semantics_test_suite")
+load(":negative_test.bzl", "negative_semantics_test_suite")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["BUILD.bazel"])
+
+filegroup(
+    name = "all_sources",
+    srcs = glob(["*.bzl"]) + ["BUILD.bazel"],
+)
+
+bzl_library(
+    name = "semantics",
+    srcs = [
+        "configuration.bzl",
+        "bindings.bzl",
+        "graph.bzl",
+        "merge.bzl",
+        "model.bzl",
+        "names.bzl",
+        "paths.bzl",
+        "requirements.bzl",
+        "schema.bzl",
+        "wrappers.bzl",
+        "version.bzl",
+    ],
+)
+
+bzl_library(
+    name = "import_rules",
+    srcs = ["import_rules.bzl"],
+    deps = [
+        "//cps:providers",
+    ],
+)
+
+bzl_library(
+    name = "export_rules",
+    srcs = ["export_rules.bzl"],
+    deps = ["//cps:providers"],
+)
+
+bzl_library(
+    name = "repositories",
+    srcs = [
+        "facade_repository.bzl",
+        "facade_rules.bzl",
+        "render_build.bzl",
+        "repositories.bzl",
+    ],
+    deps = [":semantics"],
+)
+
+semantics_test_suite(name = "semantics_tests")
+
+negative_semantics_test_suite(name = "negative_semantics_tests")

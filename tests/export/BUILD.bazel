@@ -1,0 +1,192 @@
+load("@rules_cps//cps:defs.bzl", "cc_library", "cc_test", "cps_component", "cps_package")
+load("@rules_cc//cc:cc_library.bzl", stock_cc_library = "cc_library")
+load(":export_test.bzl", "export_test_suite", "two_archives")
+
+cc_library(
+    name = "foo",
+    srcs = ["foo.cc"],
+    hdrs = ["foo.h"],
+    defines = ["EXPORTED_FOO=1"],
+)
+
+cps_component(
+    name = "component",
+    component_name = "core",
+    target = ":foo",
+    component_type = "archive",
+    install_library = "lib/libexported_foo.a",
+    headers = {"foo.h": "include/foo"},
+    definitions = {"EXPORTED_FOO": "1"},
+    compile_flags = ["-DEXPORTED_CONSUMER=1"],
+    link_flags = ["-Wl,exported-link-flag"],
+    requires = ["Dependency:full"],
+    compile_requires = ["Dependency:compile"],
+    link_requires = ["Dependency:link"],
+    dyld_requires = ["Dependency:runtime"],
+)
+
+cps_package(
+    name = "package",
+    package_name = "ExportedFoo",
+    version = "3.2.1",
+    compat_version = "3.0.0",
+    components = [":component"],
+    default_components = ["core"],
+    visibility = ["//examples:__pkg__"],
+)
+
+cps_component(
+    name = "roundtrip_component",
+    component_name = "core",
+    target = ":foo",
+    component_type = "archive",
+    install_library = "lib/libroundtrip.a",
+    headers = {"foo.h": "include/foo"},
+    compile_flags = ["-DEXPORTED_CONSUMER=1"],
+    visibility = ["//tests:__pkg__"],
+)
+
+cps_component(
+    name = "cmake_component",
+    component_name = "core",
+    target = ":foo",
+    component_type = "archive",
+    install_library = "lib/libcmake_exported.a",
+    headers = {"foo.h": "include/foo"},
+    visibility = ["//tests:__pkg__"],
+)
+
+cps_package(
+    name = "cmake_package",
+    package_name = "CMakeExported",
+    cps_version = "0.14.1",
+    version = "1.0.0",
+    components = [":cmake_component"],
+    default_components = ["core"],
+    visibility = ["//tests:__pkg__"],
+)
+
+cps_component(
+    name = "imported_headers_component",
+    component_name = "headers",
+    target = "@foo//:headers",
+    component_type = "interface",
+    headers = {"//tests/fixtures/basic:public_header": "include/foo"},
+    include_roots = ["include"],
+    visibility = ["//tests:__pkg__"],
+)
+
+cps_component(
+    name = "imported_static_component",
+    component_name = "static",
+    target = "@foo//:static",
+    component_type = "archive",
+    install_library = "lib/libimported_roundtrip.a",
+    visibility = ["//tests:__pkg__"],
+)
+
+cps_package(
+    name = "imported_roundtrip_package",
+    package_name = "ImportedRoundTrip",
+    version = "1.2.0",
+    components = [
+        ":imported_headers_component",
+        ":imported_static_component",
+    ],
+    default_components = ["static"],
+    visibility = ["//tests:__pkg__"],
+)
+
+filegroup(
+    name = "imported_roundtrip_payload",
+    srcs = [":imported_roundtrip_package"],
+    output_group = "cps_layout",
+    visibility = ["//tests:__pkg__"],
+)
+
+cps_package(
+    name = "roundtrip_package",
+    package_name = "RoundTrip",
+    version = "1.0.0",
+    components = [":roundtrip_component"],
+    default_components = ["core"],
+    visibility = ["//tests:__pkg__"],
+)
+
+genrule(
+    name = "json_validation",
+    srcs = [":package"],
+    outs = ["ExportedFoo.validated"],
+    cmd = "grep -q '\"cps_path\": \"@prefix@/share/cps/ExportedFoo\"' $(location :package) && grep -q '\"location\": \"@prefix@/lib/libexported_foo.a\"' $(location :package) && grep -q '\"compile_requires\"' $(location :package) && grep -q '\"link_requires\"' $(location :package) && grep -q '\"dyld_requires\"' $(location :package) && ! grep -q 'bazel-out' $(location :package) && touch $@",
+)
+
+cc_test(
+    name = "export_json_test",
+    srcs = ["validation_test.cc"],
+    data = [":json_validation"],
+)
+
+export_test_suite(name = "export_tests")
+
+two_archives(name = "ambiguous_archives")
+
+cps_component(
+    name = "ambiguous_component",
+    component_name = "ambiguous",
+    target = ":ambiguous_archives",
+    component_type = "archive",
+    install_library = "lib/libambiguous.a",
+    tags = ["manual"],
+)
+
+stock_cc_library(
+    name = "stock_foo",
+    srcs = ["foo.cc"],
+    hdrs = ["foo.h"],
+    defines = ["STOCK_PUBLIC=1"],
+    local_defines = ["STOCK_PRIVATE=1"],
+)
+
+cps_component(
+    name = "stock_component",
+    component_name = "stock_core",
+    target = ":stock_foo",
+    component_type = "archive",
+    install_library = "lib/libstock_foo.a",
+    headers = {"foo.h": "include/foo"},
+)
+
+cps_package(
+    name = "stock_package",
+    package_name = "StockExport",
+    components = [":stock_component"],
+)
+
+cps_package(
+    name = "duplicate_destination_package",
+    package_name = "DuplicateDestination",
+    components = [":component"],
+    symlinks = {"lib/libexported_foo.a": "libother.a"},
+    tags = ["manual"],
+)
+
+cps_package(
+    name = "escaping_symlink_package",
+    package_name = "EscapingSymlink",
+    components = [":component"],
+    symlinks = {"link": "../../outside"},
+    tags = ["manual"],
+)
+
+genrule(
+    name = "stock_json_validation",
+    srcs = [":stock_package"],
+    outs = ["StockExport.validated"],
+    cmd = "grep -q '\"STOCK_PUBLIC\": \"1\"' $(location :stock_package) && ! grep -q 'STOCK_PRIVATE' $(location :stock_package) && touch $@",
+)
+
+cc_test(
+    name = "stock_export_json_test",
+    srcs = ["validation_test.cc"],
+    data = [":stock_json_validation"],
+)

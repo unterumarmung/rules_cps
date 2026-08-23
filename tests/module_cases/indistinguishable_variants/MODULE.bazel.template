@@ -1,0 +1,22 @@
+module(name = "indistinguishable_variants_case")
+
+bazel_dep(name = "rules_cps")
+bazel_dep(name = "rules_cc", version = "0.2.22")
+bazel_dep(name = "platforms", version = "1.1.0")
+local_path_override(module_name = "rules_cps", path = "__RULES_CPS_PATH__")
+
+cps = use_extension("@rules_cps//cps:extensions.bzl", "cps")
+cps.package(name = "foo", expected_name = "Foo", expose_components = ["headers"])
+cps.archive(
+    package = "foo",
+    variant = "first",
+    archive = "@rules_cps//tests/fixtures/basic:basic.tar.gz",
+    compatible_with = ["@platforms//os:macos"],
+)
+cps.archive(
+    package = "foo",
+    variant = "second",
+    archive = "@rules_cps//tests/fixtures/basic:basic.tar.gz",
+    compatible_with = ["@platforms//os:macos"],
+)
+use_repo(cps, "foo")

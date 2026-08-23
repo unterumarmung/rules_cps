@@ -1,0 +1,5 @@
+common --enable_bzlmod
+build --incompatible_strict_action_env
+build --aspects=//cps:compatibility.bzl%cps_compatibility_aspect
+build --//cps:compatibility_aspect_enabled=true
+test --test_output=errors

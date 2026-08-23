@@ -1,0 +1,4 @@
+/bazel-*
+/tests/import_basic/bazel-*
+/tests/import_basic/MODULE.bazel.lock
+/.DS_Store

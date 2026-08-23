@@ -1,0 +1,59 @@
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+
+exports_files([
+    "BUILD.bazel",
+    "MODULE.bazel",
+])
+
+filegroup(
+    name = "all_files",
+    srcs = glob(["**"]),
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+)
+
+cc_binary(
+    name = "consumer",
+    srcs = ["consumer.cc"],
+    deps = ["@foo//:headers"],
+    tags = ["manual"],
+)
+
+cc_binary(
+    name = "local_consumer",
+    srcs = ["consumer.cc"],
+    deps = ["@foo_local//:headers"],
+    tags = ["manual"],
+)
+
+cc_binary(
+    name = "local_archive_consumer",
+    srcs = ["consumer.cc"],
+    deps = ["@foo_local_archive//:headers"],
+    tags = ["manual"],
+)
+
+cc_binary(
+    name = "http_consumer",
+    srcs = ["consumer.cc"],
+    deps = ["@foo_http//:headers"],
+    tags = ["manual"],
+)
+
+cc_binary(
+    name = "http_patched_consumer",
+    srcs = ["patched_consumer.cc"],
+    deps = ["@foo_http_patched//:headers"],
+    tags = ["manual"],
+)
+
+cc_binary(name = "bad_integrity_consumer", srcs = ["consumer.cc"], deps = ["@bad_integrity//:headers"], tags = ["manual"])
+cc_binary(name = "missing_cps_consumer", srcs = ["consumer.cc"], deps = ["@missing_cps//:headers"], tags = ["manual"])
+cc_binary(name = "wrong_name_consumer", srcs = ["consumer.cc"], deps = ["@wrong_name//:headers"], tags = ["manual"])
+cc_binary(name = "escaping_header_consumer", srcs = ["consumer.cc"], deps = ["@escaping_header//:headers"], tags = ["manual"])
+cc_binary(name = "cycle_consumer", srcs = ["consumer.cc"], deps = ["@cycle_package//:A"], tags = ["manual"])
+cc_binary(name = "multiple_cps_consumer", srcs = ["consumer.cc"], deps = ["@multiple_cps//:headers"], tags = ["manual"])
+cc_binary(name = "missing_local_consumer", srcs = ["consumer.cc"], deps = ["@missing_local//:headers"], tags = ["manual"])
+cc_binary(name = "absolute_include_consumer", srcs = ["consumer.cc"], deps = ["@absolute_include//:headers"], tags = ["manual"])
+cc_binary(name = "escaping_location_consumer", srcs = ["consumer.cc"], deps = ["@escaping_location//:static"], tags = ["manual"])
+cc_binary(name = "absolute_link_library_consumer", srcs = ["consumer.cc"], deps = ["@absolute_link_library//:headers"], tags = ["manual"])

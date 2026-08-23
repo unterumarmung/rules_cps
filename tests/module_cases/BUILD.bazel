@@ -1,0 +1,13 @@
+filegroup(
+    name = "all_files",
+    srcs = [
+        "//tests/module_cases/duplicate_config:all_files",
+        "//tests/module_cases/duplicate_package:all_files",
+        "//tests/module_cases/duplicate_variant:all_files",
+        "//tests/module_cases/indistinguishable_variants:all_files",
+        "//tests/module_cases/missing_binding_target:all_files",
+        "//tests/module_cases/non_root:all_files",
+        "//tests/module_cases/unknown_variant:all_files",
+    ],
+    visibility = ["//visibility:public"],
+)

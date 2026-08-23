@@ -1,0 +1,8 @@
+module(name = "duplicate_config_test")
+bazel_dep(name = "rules_cps")
+local_path_override(module_name = "rules_cps", path = "__RULES_CPS_PATH__")
+cps = use_extension("@rules_cps//cps:extensions.bzl", "cps")
+cps.config()
+cps.config()
+cps.package(name = "foo")
+use_repo(cps, "foo")

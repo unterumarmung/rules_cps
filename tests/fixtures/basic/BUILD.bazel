@@ -1,0 +1,13 @@
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["basic.tar.gz"])
+
+filegroup(
+    name = "package_tree",
+    srcs = glob(["package/**"]),
+)
+
+filegroup(
+    name = "public_header",
+    srcs = ["package/include/foo/foo.h"],
+)

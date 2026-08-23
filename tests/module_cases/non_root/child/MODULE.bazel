@@ -1,0 +1,6 @@
+module(name = "child", version = "1.0.0")
+bazel_dep(name = "rules_cps")
+cps = use_extension("@rules_cps//cps:extensions.bzl", "cps")
+cps.config()
+cps.package(name = "forbidden")
+use_repo(cps, "forbidden")
