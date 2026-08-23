@@ -100,7 +100,7 @@ def negative_semantics_test_suite(name):
         "missing_configured_location": "has no location after configuration selection",
         "path_escape": "path escapes the package root",
         "same_configuration_missing": "same-configuration requirement",
-        "unsupported_component": "unsupported v1 CPS component type jar",
+        "unsupported_component": "unsupported CPS component type jar",
         "unsupported_version_order": "ordered CPS version comparison for schema \"rpm\" is unsupported",
     }
     tests = []
