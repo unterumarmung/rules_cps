@@ -68,5 +68,5 @@ def version_satisfies(package_version, compat_version, requested, schema = "simp
     if normalized in ["rpm", "dpkg"]:
         if package_version == requested:
             return True
-        fail("ordered CPS version comparison for schema %r is unsupported in v1" % schema)
+        fail("ordered CPS version comparison for schema %r is unsupported" % schema)
     fail("unknown CPS version schema %r" % schema)
